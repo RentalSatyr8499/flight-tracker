@@ -1,4 +1,4 @@
-name: Track flight prices
+name: track flight prices
 
 on:
   schedule:
@@ -30,24 +30,27 @@ jobs:
       DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
       DISCORD_USER_ID: ${{ secrets.DISCORD_USER_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout
+        uses: actions/checkout@v4
         with:
           ref: main
-      - uses: actions/setup-python@v5
+      - name: set up python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-      - run: pip install -r requirements.txt
-      - name: Run unit tests
+      - name: install dependencies
+        run: pip install -r requirements.txt
+      - name: run unit tests
         run: python -m unittest discover -s tests
-      - name: Track prices and update Discord
+      - name: track prices and update discord
         run: python -m src.flight_tracker.main
-      - name: Commit price history and message ID
+      - name: commit price history and message id
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/history.json data/price-history.png data/discord_message_id.txt
           if ! git diff --cached --quiet; then
-            git commit -m "Update flight price history"
+            git commit -m "update flight price history"
             git push
           fi
