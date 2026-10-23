@@ -1,9 +1,13 @@
+"""define the normalized offer model and provider contract."""
+
 from dataclasses import dataclass
 from typing import Protocol
 
 
 @dataclass(frozen=True)
 class FlightOffer:
+    """hold the route, dates, price, and booking details for one offer."""
+
     origin: str
     destination: str
     departure_date: str
@@ -15,6 +19,8 @@ class FlightOffer:
 
 
 class FlightProvider(Protocol):
+    """define the search method required of each provider adapter."""
+
     def search(self, origin: str, destination: str, departure_date: str,
                return_date: str, currency: str) -> list[FlightOffer]:
-        """Return normalized round-trip offers for a route and date pair."""
+        """return normalized round-trip offers for a route and date pair."""
