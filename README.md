@@ -1,48 +1,56 @@
-# Northern Lights Flight Tracker
+# flight tracker
 
-Tracks round-trip flight prices for late January–early February 2027 to flexible Arctic destinations, saves daily observations, charts price history, and updates one Discord message. It sends a Discord mention when a configured price threshold is reached.
+tracks flight prices for late january to early february 2027 across flexible arctic destinations. records daily observations, renders a price chart, updates one discord message, and sends alerts when configured thresholds are met.
 
-## Stack
-- Python 3.12; `requests` for SerpApi and Discord REST calls
-- SerpApi Google Flights API behind a replaceable provider interface
-- JSON history committed to the repository by GitHub Actions
-- Matplotlib for the price-history PNG
-- GitHub Actions scheduled daily
+## stack
 
-## Repository layout
-- `src/flight_tracker/config.py` — reads environment configuration and destination/date settings.
-- `src/flight_tracker/providers/base.py` — provider interface, so another search API can replace SerpApi.
-- `src/flight_tracker/providers/serpapi.py` — searches Google Flights via SerpApi and normalizes results.
-- `src/flight_tracker/history.py` — stores deduplicated daily observations in `data/history.json`.
-- `src/flight_tracker/chart.py` — renders `data/price-history.png`.
-- `src/flight_tracker/discord_client.py` — creates or edits the persistent Discord message and sends threshold alerts.
-- `src/flight_tracker/main.py` — runs the daily tracking flow.
-- `.github/workflows/track-flights.yml` — schedule, configurable price thresholds, permissions, and secrets.
-- `tests/` — unit tests for history recording and provider normalization.
+- python 3.12 for orchestration and data processing
+- serpapi google flights api behind a replaceable provider interface
+- json price history committed by github actions
+- matplotlib for chart generation
+- discord rest api for editing a persistent message and sending alerts
+- github actions for daily scheduled runs
+- pytest for unit tests
 
-## Configure GitHub
-In repository **Settings → Secrets and variables → Actions**, add these secrets:
-- `SERPAPI_API_KEY` — SerpApi key.
-- `DISCORD_BOT_TOKEN` — Discord bot token. The bot needs View Channel, Send Messages, and Read Message History.
-- `DISCORD_CHANNEL_ID` — channel ID where the tracker message should live.
-- `DISCORD_USER_ID` — your Discord user ID to mention when a threshold is hit.
+## repository layout
 
-Edit the environment variables at the top of `.github/workflows/track-flights.yml` to change origin airport, destination airports, date window, currency, and price thresholds. Set `MIN_ALERT_PRICE` to the lowest price worth alerting about (alerts trigger at or below it). Set `MAX_ALERT_PRICE` if you also want a separately labeled threshold; leave it blank to disable that alert.
+- `.github/workflows/track-flights.yml`: schedule, routes, thresholds, and workflow steps
+- `src/flight_tracker/main.py`: runs the tracking flow
+- `src/flight_tracker/config.py`: loads settings and secrets
+- `src/flight_tracker/models.py`: shared flight and price data structures
+- `src/flight_tracker/providers/base.py`: provider interface
+- `src/flight_tracker/providers/serpapi.py`: serpapi adapter
+- `src/flight_tracker/history.py`: stores observations and persistent state
+- `src/flight_tracker/chart.py`: renders the price-history png
+- `src/flight_tracker/thresholds.py`: evaluates alert rules
+- `src/flight_tracker/discord_client.py`: edits the chart message and sends alerts
+- `tests/`: tests for providers, history, alerts, and discord behavior
 
-Enable GitHub Actions and run **Track flight prices** once manually to test the configuration. The workflow commits updated history, chart, and Discord message ID back to `main`; grant the workflow `contents: write` permission (already configured below).
+## secrets
 
-## Local run
-Python 3.12+ is recommended.
+add these under repository settings, secrets and variables, actions:
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-export SERPAPI_API_KEY=...
-export DISCORD_BOT_TOKEN=...
-export DISCORD_CHANNEL_ID=...
-export DISCORD_USER_ID=...
-python -m src.flight_tracker.main
-```
+- `SERPAPI_API_KEY`
+- `DISCORD_BOT_TOKEN`
+- `DISCORD_CHANNEL_ID`
+- `DISCORD_USER_ID`
 
-For a local run, use the same variables as the workflow. Never commit API keys or bot tokens.
+the discord bot needs permission to view the channel, send messages, edit its messages, and attach files.
+
+## configuration
+
+edit `.github/workflows/track-flights.yml` to configure routes, travel dates, currency, schedule, and alert thresholds. keep credentials in github secrets, never in yaml.
+
+## execution
+
+the workflow installs dependencies, runs the tracker, stores observations, renders the chart, updates the persistent discord message, evaluates alert rules, and commits updated history and chart artifacts. github actions runners are temporary, so state must be restored and committed on each run.
+
+## notes
+
+- keep provider-specific logic inside `providers/serpapi.py`.
+- use matplotlib for accurate charts rather than an image-generation model.
+- compare only prices with matching routes, dates, and currencies.
+- suppress duplicate alerts using persistent alert state.
+- treat returned fares as observations, not guaranteed booking prices.
+
+the code is an interface skeleton. functions raise `NotImplementedError` until implemented.
