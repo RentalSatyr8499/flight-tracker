@@ -38,6 +38,8 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m unittest discover -s tests
       - name: Track prices and update Discord
         run: python -m src.flight_tracker.main
       - name: Commit price history and message ID
