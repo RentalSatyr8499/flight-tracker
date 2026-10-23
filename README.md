@@ -18,7 +18,7 @@ Tracks round-trip flight prices for late January–early February 2027 to flexib
 - `src/flight_tracker/discord_client.py` — creates or edits the persistent Discord message and sends threshold alerts.
 - `src/flight_tracker/main.py` — runs the daily tracking flow.
 - `.github/workflows/track-flights.yml` — schedule, configurable price thresholds, permissions, and secrets.
-- `tests/` — unit tests for history, provider normalization, and threshold logic.
+- `tests/` — unit tests for history recording and provider normalization.
 
 ## Configure GitHub
 In repository **Settings → Secrets and variables → Actions**, add these secrets:
